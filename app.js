@@ -23,8 +23,8 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 
 app.use(function(req, res, next) {
-    res.setHeader("Cache-Control", "no-cache must-revalidate");
-    next();
+  res.setHeader("Cache-Control", "no-cache must-revalidate");
+  next();
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -35,13 +35,15 @@ app.get('/', function(req, res, next) {
 });
 
 app.get('/search/:word', function(req, res) {
+  console.log(req.params);
+  
   var stemmedword = stemmer(req.params.word).toLowerCase(); //stem the word
   console.log("Stemmed word: "+stemmedword);
   
   var imageurls = new Array(); 
   
   var processData = function(callback) {
-      terms.get(stemmedword, function(err, data) {
+    terms.get(stemmedword, function(err, data) {
       if (err) {
         console.log("getAttributes() failed: "+err);
         callback(err.toString(), imageurls);
@@ -49,21 +51,21 @@ app.get('/search/:word', function(req, res) {
         console.log("getAttributes() returned no results");
         callback(undefined, imageurls);
       } else {
-  	    async.forEach(data, function(attribute, callback) { 
-                images.get(attribute.value, function(err, data){
-                    if (err) {
-                        console.log(err);
-                    }
-                    imageurls.push(data[0].value);
-                    callback();
-                 });
-          }, function() {
-            callback(undefined, imageurls);
+        async.forEach(data, function(attribute, callback) { 
+          images.get(attribute.value, function(err, data){
+            if (err) {
+              console.log(err);
+            }
+            imageurls.push(data[0].value);
+            callback();
           });
-     }
+        }, function() {
+          callback(undefined, imageurls);
+        });
+      }
     });
   };
-
+  
   processData(function(err, queryresults) {
     if (err) {
       res.send(JSON.stringify({results: undefined, num_results: 0, error: err}));
@@ -78,14 +80,14 @@ var images = new dynamoDbTable('images');
 var terms = new dynamoDbTable('terms');
 
 images.init(
-    function(){
-        terms.init(
-            function(){
-                console.log("Images Storage Starter");
-            }
-        )
-        console.log("Terms Storage Starter");
-    }    
+  function(){
+    terms.init(
+      function(){
+        console.log("Terms inicio correctamente");
+      }
+    )
+    console.log("Imagenes inicio correctamente");
+  }    
 );
 
 module.exports = app;
