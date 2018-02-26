@@ -34,9 +34,7 @@ app.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
-app.get('/search/:word', function(req, res) {
-  console.log(req.params);
-  
+app.get('/search/:word', function(req, res) {  
   var stemmedword = stemmer(req.params.word).toLowerCase(); //stem the word
   console.log("Stemmed word: "+stemmedword);
   
